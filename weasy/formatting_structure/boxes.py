@@ -78,6 +78,36 @@ from ..css.values import get_single_keyword
 
 class Box(object):
     """Abstract base class for all boxes."""
+
+    class __metaclass__(type):
+        """
+        Metaclass that adds a :attr:`_all_slots` attribute to Box sub-classes:
+        the concatenation of the class and its ancestors’s :attr:`__slots__`
+        """
+        def __new__(cls, name, bases, dct):
+            new_class = type.__new__(cls, name, bases, dct)
+            new_class._all_slots = tuple(
+                name
+                for class_ in bases
+                if class_ is not object
+                for name in class_._all_slots
+            ) + new_class.__slots__
+            return new_class
+
+    __slots__ = (
+        'document', 'element', 'parent', 'width', 'height',
+        'position_x', 'position_y', 'style', 'text_indent',
+        'min_width', 'max_width', 'min_height', 'max_height',
+        'background_drawn',
+        # Should be on some sub-classes only, but put these here to avoid
+        # 'multiple bases have instance lay-out conflict'
+        'children', 'baseline'
+    ) + tuple(
+        template % side
+        for template in ['padding_%s', 'border_%s_width', 'margin_%s']
+        for side in ['top', 'right', 'bottom', 'left']
+    )
+
     def __init__(self, document, element):
         self.document = document
         # Should never be None
@@ -143,7 +173,13 @@ class Box(object):
         # styles may be kinda expensive, no need to do it again.
         new_box = cls.__new__(cls)
         # Copy attributes
-        new_box.__dict__.update(self.__dict__)
+        for name in self._all_slots:
+            try:
+                value = getattr(self, name)
+            except AttributeError:
+                pass
+            else:
+                setattr(new_box, name, value)
         new_box.style = self.style.copy()
         return new_box
 
@@ -257,6 +293,9 @@ class PageBox(Box):
     a new page box is created after every page break.
 
     """
+
+    __slots__ = ('page_number', 'root_box', 'outer_width', 'outer_height')
+
     def __init__(self, document, page_number):
         # starting at 1 for the first page.
         self.page_number = page_number
@@ -288,6 +327,9 @@ class PageBox(Box):
 
 class ParentBox(Box):
     """A box that has children."""
+
+    __slots__ = ()
+
     def __init__(self, document, element):
         super(ParentBox, self).__init__(document, element)
         self.empty()
@@ -329,6 +371,7 @@ class BlockLevelBox(Box):
     ``table`` generates a block-level box.
 
     """
+    __slots__ = ()
 
 
 class BlockContainerBox(ParentBox):
@@ -342,6 +385,7 @@ class BlockContainerBox(ParentBox):
     box.
 
     """
+    __slots__ = ()
 
 
 class BlockBox(BlockContainerBox, BlockLevelBox):
@@ -351,6 +395,7 @@ class BlockBox(BlockContainerBox, BlockLevelBox):
     generates a block box.
 
     """
+    __slots__ = ('outside_list_marker',)
 
 
 class AnonymousBox(Box):
@@ -359,6 +404,9 @@ class AnonymousBox(Box):
     Inherits style instead of copying them.
 
     """
+
+    __slots__ = ()
+
     def _init_style(self):
         parent_style = self.document.style_for(self.element)
         self.style = computed_from_cascaded(self.element, {}, parent_style)
@@ -390,6 +438,7 @@ class AnonymousBlockBox(AnonymousBox, BlockBox):
     :meth:`boxes.inline_in_block`.
 
     """
+    __slots__ = ()
 
 
 class LineBox(AnonymousBox, ParentBox):
@@ -402,6 +451,7 @@ class LineBox(AnonymousBox, ParentBox):
     be split into multiple line boxes, one for each actual line.
 
     """
+    __slots__ = ()
 
 
 class InlineLevelBox(Box):
@@ -414,6 +464,7 @@ class InlineLevelBox(Box):
     ``inline-block`` generates an inline-level box.
 
     """
+    __slots__ = ()
 
 
 class InlineBox(InlineLevelBox, ParentBox):
@@ -426,6 +477,7 @@ class InlineBox(InlineLevelBox, ParentBox):
     inline box.
 
     """
+    __slots__ = ()
 
 
 class TextBox(AnonymousBox, InlineLevelBox):
@@ -435,6 +487,9 @@ class TextBox(AnonymousBox, InlineLevelBox):
     inline boxes" are also text boxes.
 
     """
+
+    __slots__ = ('text', 'extents', 'logical_extents')
+
     def __init__(self, document, element, text):
         super(TextBox, self).__init__(document, element)
         self.text = text
@@ -446,6 +501,7 @@ class AtomicInlineLevelBox(InlineLevelBox):
     This inline-level box cannot be split for line breaks.
 
     """
+    __slots__ = ()
 
 
 class InlineBlockBox(AtomicInlineLevelBox, BlockContainerBox):
@@ -457,6 +513,7 @@ class InlineBlockBox(AtomicInlineLevelBox, BlockContainerBox):
     an inline-block box.
 
     """
+    __slots__ = ()
 
 
 class ReplacedBox(Box):
@@ -466,6 +523,9 @@ class ReplacedBox(Box):
     and is opaque from CSS’s point of view.
 
     """
+
+    __slots__ = ('replacement',)
+
     def __init__(self, document, element, replacement):
         super(ReplacedBox, self).__init__(document, element)
         self.replacement = replacement
@@ -478,6 +538,7 @@ class BlockLevelReplacedBox(ReplacedBox, BlockLevelBox):
     ``table`` generates a block-level replaced box.
 
     """
+    __slots__ = ()
 
 
 class InlineLevelReplacedBox(ReplacedBox, AtomicInlineLevelBox):
@@ -488,6 +549,7 @@ class InlineLevelReplacedBox(ReplacedBox, AtomicInlineLevelBox):
     box.
 
     """
+    __slots__ = ()
 
 
 class ImageMarkerBox(InlineLevelReplacedBox, AnonymousBox):
@@ -498,4 +560,4 @@ class ImageMarkerBox(InlineLevelReplacedBox, AnonymousBox):
     anonymous, inline-level, and replaced.
 
     """
-
+    __slots__ = ()

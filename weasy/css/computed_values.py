@@ -144,6 +144,8 @@ class StyleDict(object):
                    in this dict masks any value in the parent.
 
     """
+    __slots__ = ('_storage', '_parent')
+
     def __init__(self, data=None, parent=None):
         if not data:
             data = {}
