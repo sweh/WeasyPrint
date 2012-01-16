@@ -42,10 +42,10 @@ INITIAL_VALUES = {
     'border_right_style': 'none',
     'border_bottom_style': 'none',
     'border_left_style': 'none',
-    'border_top_width': 3,  # Computed value for 'medium'
-    'border_right_width': 3,
-    'border_bottom_width': 3,
-    'border_left_width': 3,
+    'border_top_width': 2.25,  # 3px. Computed value for 'medium'
+    'border_right_width': 2.25,
+    'border_bottom_width': 2.25,
+    'border_left_width': 2.25,
     'bottom': 'auto',
     'caption_side': 'top',
     'clear': 'none',
@@ -63,7 +63,7 @@ INITIAL_VALUES = {
     'empty_cells': 'show',
     'float': 'none',
     'font_family': ['serif'], # depends on user agent
-    'font_size': 16,  # Actually medium, but we define medium from this.
+    'font_size': 12,  # 12pt. Actually medium, but we define medium from this.
     'font_style': 'normal',
     'font_variant': 'normal',
     'font_weight': 400,

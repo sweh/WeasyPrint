@@ -137,37 +137,37 @@ def test_annotate_document():
 
     assert h1.font_weight == 700
 
-    # 32px = 1em * font-size: 2em * initial 16px
-    assert p.margin_top == 32
+    # 24pt = 1em * font-size: 2em * initial 16px
+    assert p.margin_top == 24
     assert p.margin_right == 0
-    assert p.margin_bottom == 32
+    assert p.margin_bottom == 24
     assert p.margin_left == 0
 
-    # 32px = 2em * initial 16px
-    assert ul.margin_top == 32
-    assert ul.margin_right == 32
-    assert ul.margin_bottom == 32
-    assert ul.margin_left == 32
+    # 24pt = 2em * initial 16px
+    assert ul.margin_top == 24
+    assert ul.margin_right == 24
+    assert ul.margin_bottom == 24
+    assert ul.margin_left == 24
 
-    # thick = 5px, 0.25 inches = 96*.25 = 24px
+    # thick = 3.75pt, 0.25 inches = 72*.25 = 18pt
     assert ul.border_top_width == 0
-    assert ul.border_right_width == 5
+    assert ul.border_right_width == 3.75
     assert ul.border_bottom_width == 0
-    assert ul.border_left_width == 24
+    assert ul.border_left_width == 18
 
-    # 32px = 2em * initial 16px
-    # 64px = 4em * initial 16px
-    assert li_0.margin_top == 32
+    # 24pt = 2em * initial 16px
+    # 48pt = 4em * initial 16px
+    assert li_0.margin_top == 24
     assert li_0.margin_right == 0
-    assert li_0.margin_bottom == 32
-    assert li_0.margin_left == 64
+    assert li_0.margin_bottom == 24
+    assert li_0.margin_left == 48
 
     assert a.text_decoration == frozenset(['underline'])
 
-    assert a.padding_top == 1
-    assert a.padding_right == 2
-    assert a.padding_bottom == 3
-    assert a.padding_left == 4
+    assert a.padding_top == 0.75
+    assert a.padding_right == 1.5
+    assert a.padding_bottom == 2.25
+    assert a.padding_left == 3
 
     color = a.color
     assert (color.red, color.green, color.blue, color.alpha) == (255, 0, 0, 1)
@@ -200,11 +200,11 @@ def test_page():
     document = parse_html('doc1.html', user_stylesheets=[
         cssutils.parseString('''
             @page {
-                margin: 10px;
+                margin: 10pt;
             }
             @page :right {
-                margin-bottom: 12pt;
-                font-size: 20px;
+                margin-bottom: 12px;
+                font-size: 20pt;
                 @top-left {
                     width: 10em;
                 }
@@ -213,14 +213,14 @@ def test_page():
     ])
 
     style = document.style_for('first_left_page')
-    assert style.margin_top == 5
+    assert style.margin_top == 3.75
     assert style.margin_left == 10
     assert style.margin_bottom == 10
 
     style = document.style_for('first_right_page')
-    assert style.margin_top == 5
+    assert style.margin_top == 3.75
     assert style.margin_left == 10
-    assert style.margin_bottom == 16
+    assert style.margin_bottom == 9
 
     style = document.style_for('left_page')
     assert style.margin_top == 10
@@ -230,7 +230,7 @@ def test_page():
     style = document.style_for('right_page')
     assert style.margin_top == 10
     assert style.margin_left == 10
-    assert style.margin_bottom == 16
+    assert style.margin_bottom == 9
 
     style = document.style_for('first_left_page', '@top-left')
     assert style is None
@@ -287,9 +287,9 @@ def test_error_recovery():
 def test_line_height_inheritance():
     document = TestPNGDocument.from_string('''
         <style>
-            html { font-size: 10px; line-height: 140% }
-            section { font-size: 10px; line-height: 1.4 }
-            div, p { font-size: 20px; vertical-align: 50% }
+            html { font-size: 10pt; line-height: 140% }
+            section { font-size: 10pt; line-height: 1.4 }
+            div, p { font-size: 20pt; vertical-align: 50% }
         </style>
         <body><div><section><p></p></section></div></body>
     ''')

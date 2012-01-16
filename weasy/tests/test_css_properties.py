@@ -68,11 +68,11 @@ def test_expand_four_sides():
         'padding_bottom': '2em',
         'padding_left': '0',
     }
-    assert expand_to_dict('padding', '1em 0 2em 5px') == {
+    assert expand_to_dict('padding', '1em 0 2em 5pt') == {
         'padding_top': '1em',
         'padding_right': '0',
         'padding_bottom': '2em',
-        'padding_left': '5px',
+        'padding_left': '5pt',
     }
     with raises(ValueError):
         expand_to_dict('padding', '1 2 3 4 5')
@@ -81,45 +81,45 @@ def test_expand_four_sides():
 @SUITE.test
 def test_expand_borders():
     """Test the ``border`` property."""
-    assert expand_to_dict('border_top', '3px dotted red') == {
-        'border_top_width': '3px',
+    assert expand_to_dict('border_top', '3pt dotted red') == {
+        'border_top_width': '3pt',
         'border_top_style': 'dotted',
         'border_top_color': 'red',
     }
-    assert expand_to_dict('border_top', '3px dotted') == {
-        'border_top_width': '3px',
+    assert expand_to_dict('border_top', '3pt dotted') == {
+        'border_top_width': '3pt',
         'border_top_style': 'dotted',
         'border_top_color': 'currentColor',
     }
-    assert expand_to_dict('border_top', '3px red') == {
-        'border_top_width': '3px',
+    assert expand_to_dict('border_top', '3pt red') == {
+        'border_top_width': '3pt',
         'border_top_style': 'none',
         'border_top_color': 'red',
     }
     assert expand_to_dict('border_top', 'solid') == {
-        'border_top_width': 3,
+        'border_top_width': 2.25,
         'border_top_style': 'solid',
         'border_top_color': 'currentColor',
     }
-    assert expand_to_dict('border', '6px dashed green') == {
-        'border_top_width': '6px',
+    assert expand_to_dict('border', '6pt dashed green') == {
+        'border_top_width': '6pt',
         'border_top_style': 'dashed',
         'border_top_color': 'green',
 
-        'border_left_width': '6px',
+        'border_left_width': '6pt',
         'border_left_style': 'dashed',
         'border_left_color': 'green',
 
-        'border_bottom_width': '6px',
+        'border_bottom_width': '6pt',
         'border_bottom_style': 'dashed',
         'border_bottom_color': 'green',
 
-        'border_right_width': '6px',
+        'border_right_width': '6pt',
         'border_right_style': 'dashed',
         'border_right_color': 'green',
     }
     with raises(ValueError):
-        expand_to_dict('border', '6px dashed left')
+        expand_to_dict('border', '6pt dashed left')
 
 
 @SUITE.test
@@ -210,31 +210,31 @@ def test_expand_background():
         position='50% 0%' ##
     )
     assert_background(
-        '#00f 10% 200px',
+        '#00f 10% 200pt',
         color='#00f', ##
         image='none',
         repeat='repeat',
         attachment='scroll',
-        position='10% 200px' ##
+        position='10% 200pt' ##
     )
     assert_background(
-        'right 78px fixed',
+        'right 78pt fixed',
         color='transparent',
         image='none',
         repeat='repeat',
         attachment='fixed', ##
-        position='100% 78px' ##
+        position='100% 78pt' ##
     )
 
 
 @SUITE.test
 def test_font():
     """Test the ``font`` property."""
-    assert expand_to_dict('font', '12px sans_serif') == {
+    assert expand_to_dict('font', '12pt sans_serif') == {
         'font_style': 'normal',
         'font_variant': 'normal',
         'font_weight': 400,
-        'font_size': '12px', ##
+        'font_size': '12pt', ##
         'line_height': 'normal',
         'font_family': 'sans_serif', ##
     }

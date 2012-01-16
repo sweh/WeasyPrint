@@ -26,15 +26,15 @@ import collections
 from .properties import INITIAL_VALUES
 
 
-# How many CSS pixels is one <unit>?
+# How many internal units is one <unit>?
 # http://www.w3.org/TR/CSS21/syndata.html#length-units
-LENGTHS_TO_PIXELS = {
-    'px': 1,
-    'pt': 1. / 0.75,
-    'pc': 16.,  # LENGTHS_TO_PIXELS['pt'] * 12
-    'in': 96.,  # LENGTHS_TO_PIXELS['pt'] * 72
-    'cm': 96. / 2.54,  # LENGTHS_TO_PIXELS['in'] / 2.54
-    'mm': 96. / 25.4,  # LENGTHS_TO_PIXELS['in'] / 25.4
+INTERNAL_UNITS_PER = {
+    'px': 0.75,
+    'pt': 1.,
+    'pc': 12.,
+    'in': 72.,
+    'cm': 72. / 2.54,  # INTERNAL_UNITS_PER['in'] / 2.54
+    'mm': 72. / 25.4,  # INTERNAL_UNITS_PER['in'] / 25.4
 }
 
 # Value in pixels of font-size for <absolute-size> keywords: 12pt (16px) for
@@ -58,9 +58,9 @@ FONT_SIZE_KEYWORDS = collections.OrderedDict(
 # These are unspecified, other than 'thin' <='medium' <= 'thick'.
 # Values are in pixels.
 BORDER_WIDTH_KEYWORDS = {
-    'thin': 1,
-    'medium': 3,
-    'thick': 5,
+    'thin': 1 * INTERNAL_UNITS_PER['px'],
+    'medium': 3 * INTERNAL_UNITS_PER['px'],
+    'thick': 5 * INTERNAL_UNITS_PER['px'],
 }
 assert INITIAL_VALUES['border_top_width'] == BORDER_WIDTH_KEYWORDS['medium']
 
@@ -94,36 +94,36 @@ FONT_WEIGHT_RELATIVE = dict(
 # name=(width in pixels, height in pixels)
 PAGE_SIZES = dict(
     A5=(
-        148 * LENGTHS_TO_PIXELS['mm'],
-        210 * LENGTHS_TO_PIXELS['mm'],
+        148 * INTERNAL_UNITS_PER['mm'],
+        210 * INTERNAL_UNITS_PER['mm'],
     ),
     A4=(
-        210 * LENGTHS_TO_PIXELS['mm'],
-        297 * LENGTHS_TO_PIXELS['mm'],
+        210 * INTERNAL_UNITS_PER['mm'],
+        297 * INTERNAL_UNITS_PER['mm'],
     ),
     A3=(
-        297 * LENGTHS_TO_PIXELS['mm'],
-        420 * LENGTHS_TO_PIXELS['mm'],
+        297 * INTERNAL_UNITS_PER['mm'],
+        420 * INTERNAL_UNITS_PER['mm'],
     ),
     B5=(
-        176 * LENGTHS_TO_PIXELS['mm'],
-        250 * LENGTHS_TO_PIXELS['mm'],
+        176 * INTERNAL_UNITS_PER['mm'],
+        250 * INTERNAL_UNITS_PER['mm'],
     ),
     B4=(
-        250 * LENGTHS_TO_PIXELS['mm'],
-        353 * LENGTHS_TO_PIXELS['mm'],
+        250 * INTERNAL_UNITS_PER['mm'],
+        353 * INTERNAL_UNITS_PER['mm'],
     ),
     letter=(
-        8.5 * LENGTHS_TO_PIXELS['in'],
-        11 * LENGTHS_TO_PIXELS['in'],
+        8.5 * INTERNAL_UNITS_PER['in'],
+        11 * INTERNAL_UNITS_PER['in'],
     ),
     legal=(
-        8.5 * LENGTHS_TO_PIXELS['in'],
-        14 * LENGTHS_TO_PIXELS['in'],
+        8.5 * INTERNAL_UNITS_PER['in'],
+        14 * INTERNAL_UNITS_PER['in'],
     ),
     ledger=(
-        11 * LENGTHS_TO_PIXELS['in'],
-        17 * LENGTHS_TO_PIXELS['in'],
+        11 * INTERNAL_UNITS_PER['in'],
+        17 * INTERNAL_UNITS_PER['in'],
     ),
 )
 for w, h in PAGE_SIZES.values():
@@ -249,9 +249,9 @@ def length(computer, name, value):
         # No conversion needed.
         return value
 
-    if value.dimension in LENGTHS_TO_PIXELS:
+    if value.dimension in INTERNAL_UNITS_PER:
         # Convert absolute lengths to pixels
-        factor = LENGTHS_TO_PIXELS[value.dimension]
+        factor = INTERNAL_UNITS_PER[value.dimension]
     elif value.dimension in ('em', 'ex'):
         factor = computer.computed.font_size
 
@@ -333,16 +333,14 @@ def font_size(computer, name, value):
     parent_font_size = computer.parent_style['font_size']
 
     if value.type == 'DIMENSION':
-        if value.dimension == 'px':
-            factor = 1
+        if value.dimension in INTERNAL_UNITS_PER:
+            factor = INTERNAL_UNITS_PER[value.dimension]
         elif value.dimension == 'em':
             factor = parent_font_size
         elif value.dimension == 'ex':
             # TODO: find a better way to measure ex, see
             # http://www.w3.org/TR/CSS21/syndata.html#length-units
             factor = parent_font_size * 0.5
-        elif value.dimension in LENGTHS_TO_PIXELS:
-            factor = LENGTHS_TO_PIXELS[value.dimension]
     elif value.type == 'PERCENTAGE':
         factor = parent_font_size / 100.
     elif value.type == 'NUMBER' and value.value == 0:

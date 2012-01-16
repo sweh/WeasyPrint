@@ -130,7 +130,7 @@ def is_dimension(value, negative=True):
     # Units may be ommited on zero lenghts.
     return (
         type_ == 'DIMENSION' and (negative or value.value >= 0) and (
-            value.dimension in computed_values.LENGTHS_TO_PIXELS or
+            value.dimension in computed_values.INTERNAL_UNITS_PER or
             value.dimension in ('em', 'ex'))
         ) or (type_ == 'NUMBER' and value.value == 0)
 

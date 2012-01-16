@@ -30,7 +30,7 @@ import lxml.html
 import cairo
 
 from .css import get_all_computed_styles
-from .css.computed_values import LENGTHS_TO_PIXELS
+from .css.computed_values import INTERNAL_UNITS_PER
 from .formatting_structure.build import build_formatting_structure
 from .layout import layout
 from . import draw
@@ -168,10 +168,12 @@ class PNGDocument(Document):
 
     def draw_page(self, page):
         """Draw a single page and return an ImageSurface."""
-        width = int(math.ceil(page.outer_width))
-        height = int(math.ceil(page.outer_height))
+        internal_to_px = 1 / INTERNAL_UNITS_PER['px']
+        width = int(math.ceil(page.outer_width * internal_to_px))
+        height = int(math.ceil(page.outer_height * internal_to_px))
         surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, width, height)
         context = draw.CairoContext(surface)
+        context.scale(internal_to_px, internal_to_px)
         draw.draw_page(self, page, context)
         self.surface.finish()
         return width, height, surface
@@ -229,14 +231,14 @@ class PDFDocument(Document):
         # The actual page size is set for each page.
         surface = cairo.PDFSurface(target, 1, 1)
 
-        px_to_pt = 1 / LENGTHS_TO_PIXELS['pt']
+        internal_to_pt = 1 / INTERNAL_UNITS_PER['pt']
         for page in self.pages:
             # Actual page size is here. May be different between pages.
             surface.set_size(
-                page.outer_width * px_to_pt,
-                page.outer_height * px_to_pt)
+                page.outer_width * internal_to_pt,
+                page.outer_height * internal_to_pt)
             context = draw.CairoContext(surface)
-            context.scale(px_to_pt, px_to_pt)
+            context.scale(internal_to_pt, internal_to_pt)
             draw.draw_page(self, page, context)
             surface.show_page()
 

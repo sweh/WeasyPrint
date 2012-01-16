@@ -55,7 +55,7 @@ class CairoContext(cairo.Context):
 def draw_page(document, page, context):
     """Draw the given PageBox to a Cairo context.
 
-    The context should be scaled so that lengths are in CSS pixels.
+    The context should be scaled so that lengths are in internal units.
 
     """
     draw_page_background(document, context, page)

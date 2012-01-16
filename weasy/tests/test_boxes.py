@@ -323,7 +323,7 @@ def test_styles():
     box = parse('''
         <style>
             span { display: block; }
-            * { margin: 42px }
+            * { margin: 42pt }
             html { color: blue }
         </style>
         <p>Lorem <em>ipsum <strong>dolor <span>sit</span>
@@ -384,10 +384,10 @@ def test_page_style():
     """Test the management of page styles."""
     document = TestPNGDocument.from_string('''
         <style>
-            @page { margin: 3px }
-            @page :first { margin-top: 20px }
-            @page :right { margin-right: 10px; margin-top: 10px }
-            @page :left { margin-left: 10px; margin-top: 10px }
+            @page { margin: 3pt }
+            @page :first { margin-top: 20pt }
+            @page :right { margin-right: 10pt; margin-top: 10pt }
+            @page :left { margin-left: 10pt; margin-top: 10pt }
         </style>
     ''')
 
@@ -593,7 +593,7 @@ def test_tables():
 
 @SUITE.test
 def test_table_style():
-    html = parse_all('<table style="margin: 1px; padding: 2px"></table>')
+    html = parse_all('<table style="margin: 1pt; padding: 2pt"></table>')
     body, = html.children
     wrapper, = body.children
     table, = wrapper.children
@@ -609,7 +609,7 @@ def test_table_style():
 def test_column_style():
     html = parse_all('''
         <table>
-            <col span=3 style="width: 10px"></col>
+            <col span=3 style="width: 10pt"></col>
             <col span=2></col>
         </table>
     ''')
@@ -1093,8 +1093,8 @@ def test_margin_boxes():
     document = TestPNGDocument.from_string('''
         <style>
             @page {
-                -weasy-size: 30px;
-                margin: 10px;
+                -weasy-size: 30pt;
+                margin: 10pt;
                 @top-center { content: "Title" }
             }
             @page :first {

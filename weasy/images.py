@@ -27,13 +27,14 @@ import logging
 import cairo
 
 from .utils import urlopen
-from .css.computed_values import LENGTHS_TO_PIXELS
+from .css.computed_values import INTERNAL_UNITS_PER
 
 
 LOGGER = logging.getLogger('WEASYPRINT')
 
 # Map MIME types to functions that take a byte stream and return
-# ``(pattern, width, height)`` a cairo Pattern and its dimension in pixels.
+# ``(pattern, width, height, unit')`` a cairo Pattern, its dimensions, and
+# the unit for the dimensions as in ``INTERNAL_UNITS_PER``.
 FORMAT_HANDLERS = {}
 
 # TODO: currently CairoSVG only support images with an explicit
@@ -54,7 +55,7 @@ def png_handler(file_like, _uri):
     """Return a cairo Surface from a PNG byte stream."""
     surface = cairo.ImageSurface.create_from_png(file_like)
     pattern = cairo.SurfacePattern(surface)
-    return pattern, surface.get_width(), surface.get_height()
+    return pattern, surface.get_width(), surface.get_height(), 'px'
 
 
 @register_format('image/svg+xml')
@@ -76,19 +77,8 @@ def cairosvg_handler(file_like, uri):
         surface = SVGSurface(tree, output=None)
     except (ParseError, NotImplementedError) as exception:
         return exception
-    # These are in points. Convert to CSS pixels.
-    css_px_per_points = LENGTHS_TO_PIXELS['pt']
-    width = surface.width * css_px_per_points
-    height = surface.height * css_px_per_points
-
     pattern = cairo.SurfacePattern(surface.cairo)
-    # surface.cairo has an intrinsic size in points but we want pixels,
-    # to be consistent with raster images
-    transform = cairo.Matrix()
-    transform.scale(1 / css_px_per_points, 1 / css_px_per_points)
-    pattern.set_matrix(transform)
-
-    return pattern, width, height
+    return pattern, surface.width, surface.height, 'pt'
 
 
 def _init_cairosvg():
@@ -146,16 +136,28 @@ def get_image_from_uri(uri):
 
     handler = FORMAT_HANDLERS.get(mime_type, fallback_handler)
     try:
-        image = handler(file_like, uri)
+        result = handler(file_like, uri)
     except (IOError, MemoryError) as exception:
-        pass # Network or parsing error
+        # Network or parsing error.
+        # Do nothing but keep the 'exception' object.
+        pass
     else:
-        exception = image if isinstance(image, Exception) else None
+        exception = result if isinstance(result, Exception) else None
     finally:
         file_like.close()
 
     if exception is None:
-        return image
+        pattern, width, height, unit = result
+
+        # Scale to internal units:
+        factor = INTERNAL_UNITS_PER[unit]
+        width *= factor
+        height *= factor
+        transform = cairo.Matrix()
+        transform.scale(1 / factor, 1 / factor)
+        pattern.set_matrix(transform)
+
+        return pattern, width, height
     else:
         LOGGER.warn('Error while parsing an image at %s : %s', uri, exception)
         return None
