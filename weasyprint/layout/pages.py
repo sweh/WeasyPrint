@@ -14,6 +14,7 @@ from __future__ import division, unicode_literals
 
 from ..logger import LOGGER
 from ..formatting_structure import boxes, build
+from ..utils import ImmutableObject
 from .blocks import block_level_layout, block_container_layout
 from .percentages import resolve_percentages
 from .preferred import inline_preferred_minimum_width, inline_preferred_width
@@ -418,10 +419,13 @@ def margin_box_content_layout(document, page, box):
     # content_to_boxes() only produces inline-level boxes, no need to
     # run other post-processors from build.build_formatting_structure()
     box = build.inline_in_block(box)
-    box, resume_at, next_page, _, _ = block_container_layout(
-        document, box,
-        max_position_y=float('inf'), skip_stack=None,
-        device_size=page.style.size, page_is_empty=True)
+    box, resume_at, _state = block_container_layout(
+        box, skip_stack=None, state=ImmutableObject().set(
+            document=document,
+            max_position_y=float('inf'),
+            page_is_empty=True,
+            adjoining_margins=[],
+            collapsing_through=False))
     assert resume_at is None
 
     vertical_align = box.style.vertical_align
@@ -474,27 +478,31 @@ def make_page(document, root_box, page_type, resume_at):
 
     """
     page = make_empty_page(document, root_box, page_type)
-    device_size = page.style.size
-
-    root_box.position_x = page.content_box_x()
-    root_box.position_y = page.content_box_y()
-    page_content_bottom = root_box.position_y + page.height
-    initial_containing_block = page
 
     # TODO: handle cases where the root element is something else.
     # See http://www.w3.org/TR/CSS21/visuren.html#dis-pos-flo
     assert isinstance(root_box, boxes.BlockBox)
-    page_is_empty = True
-    adjoining_margins = []
-    root_box, resume_at, next_page, _, _ = block_level_layout(
-        document, root_box, page_content_bottom, resume_at,
-        initial_containing_block, device_size, page_is_empty,
-        adjoining_margins)
+    root_box.position_x = page.content_box_x()
+    root_box.position_y = page.content_box_y()
+
+    state = ImmutableObject().set(
+        document=document,
+        containing_block=page,
+        # Whether the page is "content-empty" as in css3-page
+        page_is_empty=True,
+        # For margin collapsing
+        adjoining_margins=[],
+        collapsing_through = False,
+        # the absolute vertical position (as in ``some_box.position_y``)
+        # of the bottom of the content box of the current page area.
+        max_position_y=root_box.position_y + page.height,
+        # any, left or right. Used for 'page-break-after: left/right'
+        next_page='any',
+    )
+    root_box, resume_at, state = block_level_layout(root_box, resume_at, state)
     assert root_box
-
     page = page.copy_with_children([root_box])
-
-    return page, resume_at, next_page
+    return page, resume_at, state.next_page
 
 
 def make_all_pages(document, root_box):

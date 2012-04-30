@@ -20,8 +20,7 @@ from .percentages import resolve_percentages, resolve_one_percentage
 from .preferred import table_and_columns_preferred_widths
 
 
-def table_layout(document, table, max_position_y, skip_stack,
-                 containing_block, device_size, page_is_empty):
+def table_layout(table, skip_stack, state):
     """Layout for a table box.
 
     For now only the fixed layout and separate border model are supported.
@@ -105,12 +104,12 @@ def table_layout(document, table, max_position_y, skip_stack,
                 # The computed height is a minimum
                 computed_cell_height = cell.height
                 cell.height = 'auto'
-                cell, _, _, _, _ = block_container_layout(
-                    document, cell,
-                    max_position_y=float('inf'),
-                    skip_stack=None,
-                    device_size=device_size,
-                    page_is_empty=True)
+                cell, _, _ = block_container_layout(
+                    cell, skip_stack=None, state=state.set(
+                        adjoining_margins=[],
+                        collapsing_through = False,
+                        # No page breaks inside cells for now.
+                        max_position_y=float('inf')))
                 if computed_cell_height != 'auto':
                     cell.height = max(cell.height, computed_cell_height)
                 new_row_children.append(cell)
@@ -168,9 +167,9 @@ def table_layout(document, table, max_position_y, skip_stack,
             next_position_y = position_y + row.height + border_spacing_y
             # Break if this row overflows the page, unless there is no
             # other content on the page.
-            if next_position_y > max_position_y and (
+            if next_position_y > state.max_position_y and (
                     new_table_children or new_group_children
-                    or not page_is_empty):
+                    or not state.page_is_empty):
                 resume_at = (index_row, None)
                 break
 
@@ -236,14 +235,11 @@ def table_layout(document, table, max_position_y, skip_stack,
         group.width = last.position_x + last.width - first.position_x
         group.height = columns_height
 
-    if resume_at and not page_is_empty and (
+    if resume_at and not state.page_is_empty and (
             table.style.page_break_inside == 'avoid'):
         table = None
         resume_at = None
-    next_page = 'any'
-    adjoining_margins = []
-    collapsing_through = False
-    return table, resume_at, next_page, adjoining_margins, collapsing_through
+    return table, resume_at, state
 
 
 def add_top_padding(box, extra_padding):
@@ -339,7 +335,7 @@ def fixed_table_layout(box):
     table.column_widths = column_widths
 
 
-def auto_table_layout(box, containing_block):
+def auto_table_layout(box, state):
     """Run the auto table layout and return a list of column widths.
 
     http://www.w3.org/TR/CSS21/tables.html#auto-table-layout
@@ -350,8 +346,8 @@ def auto_table_layout(box, containing_block):
      column_preferred_minimum_widths, column_preferred_widths) = \
         table_and_columns_preferred_widths(box, resolved_table_width=True)
 
-    table_maximum_width = max(
-        containing_block.width, table_preferred_minimum_width)
+    cb_width = state.containing_block.width
+    table_maximum_width = max(cb_width, table_preferred_minimum_width)
 
     # First of all, we have to get a grid with cells inside
     # TODO: handle the border spacings
@@ -367,7 +363,7 @@ def auto_table_layout(box, containing_block):
         # according to their preferred widths
         table.column_widths = column_preferred_minimum_widths
         lost_width = (
-            min(containing_block.width, table_preferred_width) -
+            min(cb_width, table_preferred_width) -
             table_preferred_minimum_width)
         if lost_width > 0:
             table.column_widths = [
@@ -378,15 +374,15 @@ def auto_table_layout(box, containing_block):
                        column_preferred_minimum_widths)]
 
 
-def table_wrapper_width(wrapper, containing_block):
+def table_wrapper_width(wrapper, state):
     """Find the width of each column and derive the wrapper width."""
     table = wrapper.get_wrapped_table()
-    resolve_percentages(table, containing_block)
+    resolve_percentages(table, state.containing_block)
 
     if table.style.table_layout == 'fixed' and table.width != 'auto':
         fixed_table_layout(wrapper)
     else:
-        auto_table_layout(wrapper, containing_block)
+        auto_table_layout(wrapper, state)
 
     wrapper.width = table.border_width()
     wrapper.style.width = Dimension(wrapper.width, 'px')

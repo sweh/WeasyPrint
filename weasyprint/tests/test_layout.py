@@ -16,6 +16,7 @@ from __future__ import division, unicode_literals
 from .testing_utils import (
     TestPNGDocument, resource_filename, FONTS, assert_no_logs, capture_logs)
 from .test_boxes import monkeypatch_validation
+from ..utils import ImmutableObject
 from ..formatting_structure import boxes
 from ..layout.inlines import split_inline_box
 from ..layout.percentages import resolve_percentages
@@ -1110,12 +1111,15 @@ def test_inlinebox_spliting():
         paragraph.height = 'auto'
         return document, inline, paragraph
 
-    def get_parts(document, inlinebox, width, parent):
+    def get_parts(document, box, width, parent):
         """Yield the parts of the splitted ``inlinebox`` of given ``width``."""
         skip = None
         while 1:
             box, skip, _ = split_inline_box(
-                document, inlinebox, 0, width, skip, parent, None)
+                box, position_x=0, max_x=width, skip_stack=skip,
+                state=ImmutableObject().set(
+                    document=document,
+                    containing_block=parent))
             yield box
             if skip is None:
                 break
@@ -1228,7 +1232,10 @@ def test_inlinebox_text_after_spliting():
     skip = None
     while 1:
         box, skip, _ = split_inline_box(
-            document, inlinebox, 0, 100, skip, paragraph, None)
+            inlinebox, position_x=0, max_x=100, skip_stack=skip,
+            state=ImmutableObject().set(
+                document=document,
+                containing_block=paragraph))
         parts.append(box)
         if skip is None:
             break

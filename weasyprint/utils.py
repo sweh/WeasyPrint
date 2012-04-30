@@ -160,3 +160,17 @@ class cached_property(object):
             value = self.func(obj)
             obj.__dict__[self.__name__] = value
         return value
+
+
+class ImmutableObject(object):
+    """An object where setting attributes is forbidden."""
+    def set(self, **kwargs):
+        """Return a new object with added/updated attributes."""
+        new = self.__class__()
+        update = new.__dict__.update
+        update(self.__dict__)
+        update(kwargs)
+        return new
+
+    def __setattr__(self, name, value):
+        raise TypeError('Immutable object.')
