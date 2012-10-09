@@ -9,14 +9,25 @@ menu:
       link: /
   - News:
       link: /news/
-  - Download:
-      link: /install/
   - Documentation:
-      link: /using/
+      link: /docs/
+  - Install:
+      link: /docs/install/
   - Community:
       link: /community/
 
+redirects:
+    /install/: /docs/install/
+    /using/: /docs/tutorial/
+    /hacking/: /docs/hacking/
+    /features/: /docs/features/
+
+
 project (git):
+  url: git://github.com/Kozea/WeasyPrint.git
+  path: weasyprint
+
+sphinx (git):
   url: git://github.com/Kozea/WeasyPrint.git
   path: weasyprint
 

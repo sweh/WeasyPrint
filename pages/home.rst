@@ -10,7 +10,7 @@ It is based on various libraries but **not** on a full rendering engine like
 WebKit or Gecko. The CSS layout engine is written in Python and meant to be
 easy to hack on.
 
-Get started by `installing it </install/>`_ or jump to:
+Get started by `installing it </docs/install/>`_ or jump to:
 
 * :codelink:`Source code` on GitHub
 * `Issue tracker <http://redmine.kozea.fr/projects/weasyprint/issues>`_
@@ -18,8 +18,8 @@ Get started by `installing it </install/>`_ or jump to:
 * `Continuous integration <http://jenkins.kozea.org/job/WeasyPrint/>`_
   with Jenkins
 * `Releases <http://pypi.python.org/pypi/WeasyPrint>`_ on PyPI
-  (but using pip is recommended for `installing </install/>`_)
-* See the supported `features </features/>`_
+  (but using pip is recommended for `installing </docs/install/>`_)
+* See the supported `features </docs/features/>`_
 * `Get in touch </community/>`_
 
 
