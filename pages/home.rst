@@ -3,23 +3,20 @@ WeasyPrint converts HTML/CSS documents to PDF
 
 WeasyPrint is a visual rendering engine for HTML and CSS that can export
 to PDF. It aims to support web standards for printing.
-WeasyPrint is free software made available under the `BSD license
-<https://github.com/Kozea/WeasyPrint/blob/master/LICENSE>`_.
+WeasyPrint is free software made available under a BSD license.
 
-It is based on various libraries but **not** on a full rendering engine like
-WebKit or Gecko. The CSS layout engine is written in Python and meant to be
-easy to hack on.
+It is based on various libraries but *not* on a full rendering engine like
+WebKit or Gecko. The CSS layout engine is written in Python, designed for
+pagination, and meant to be easy to hack on.
 
-Get started by `installing it </docs/install/>`_ or jump to:
+* Free software: BSD licensed
+* Python 2.6+ or 3.x
+* Source code and issue tracker: `on Github <https://github.com/Kozea/WeasyPrint>`_
+* `Documentation </docs/>`_
 
-* :codelink:`Source code` on GitHub
-* `Issue tracker <http://redmine.kozea.fr/projects/weasyprint/issues>`_
-  with Redmine
-* `Continuous integration <http://jenkins.kozea.org/job/WeasyPrint/>`_
-  with Jenkins
-* `Releases <http://pypi.python.org/pypi/WeasyPrint>`_ on PyPI
-  (but using pip is recommended for `installing </docs/install/>`_)
-* See the supported `features </docs/features/>`_
+  - `Install </docs/install/>`_
+  - `Features </docs/features/>`_
+
 * `Get in touch </community/>`_
 
 
