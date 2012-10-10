@@ -24,12 +24,12 @@ The archives_ are published on the Librelist website.
 IRC
 ---
 
-Chat with us at `##kozea <irc://chat.freenode.net/##kozea>`_ on 
+Chat with us at `##kozea <irc://chat.freenode.net/##kozea>`_ on
 `Freenode <http://freenode.net/>`_.
 
 Issue/bug tracker
 -----------------
 
-Specific bug reports or feature requests should go to `our Redmine instance
-<http://redmine.kozea.fr/projects/weasyprint/issues>`_.
+Specific bug reports or feature requests should go `on GitHub
+<https://github.com/Kozea/WeasyPrint/issues>`_.
 Please include in full any detail such as an error message or tracebacks.
