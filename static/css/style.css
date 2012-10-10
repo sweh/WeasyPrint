@@ -84,7 +84,7 @@ h2 a, h3 a, h4 a, h5 a, h6 a
 }
 
 h2{
-  background: url(img/rond.png) no-repeat 6px 8px;
+  background: url(img/rond.png) no-repeat 5px 5px;
   height: 60px;
   margin-top: 35px;
   padding: 15px 0 0 20px;
@@ -375,4 +375,9 @@ body > footer li a:focus{
 
 .ref {
     font-size: .7em;
+}
+
+/* Only show the date (not the time of day) for news items */
+time small {
+    display: none;
 }
