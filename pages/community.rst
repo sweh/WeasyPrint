@@ -24,7 +24,7 @@ The archives_ are published on the Librelist website.
 IRC
 ---
 
-Chat with us at `##kozea <irc://chat.freenode.net/##kozea>`_ on
+Chat with us at `##kozea <irc://chat.freenode.net/%23%23kozea>`_ on
 `Freenode <http://freenode.net/>`_.
 
 Issue/bug tracker
