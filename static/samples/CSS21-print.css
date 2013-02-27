@@ -20,7 +20,7 @@
         transform: rotate(-90deg);
     }
 }
-html, body { font: 12pt/1.25 Fontin, serif !important; }
+html, body { font: 12pt/1.25 Fontin, serif !important; -weasy-hyphens: auto }
 body { text-align: justify; padding: 0 !important;
        background: none !important; }
 hr.navbar { display: none }
