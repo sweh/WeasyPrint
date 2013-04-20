@@ -69,6 +69,24 @@ RE_INITIAL_NOT_COMPUTED = re.compile(
     '^(display|(border_[a-z]+|outline)_(width|color))$').match
 
 
+# Non presentational HTML4 attributes
+# http://www.w3.org/TR/CSS21/cascade.html#preshint
+NON_PRESENTATIONAL_ATTRIBUTES = [
+    'abbr', 'accept-charset', 'accept', 'accesskey', 'action', 'alt',
+    'archive', 'axis', 'charset', 'checked', 'cite', 'class', 'classid',
+    'code', 'codebase', 'codetype', 'colspan', 'coords', 'data', 'datetime',
+    'declare', 'defer', 'dir', 'disabled', 'enctype', 'for', 'headers', 'href',
+    'hreflang', 'http-equiv', 'id', 'ismap', 'label', 'lang', 'language',
+    'longdesc', 'maxlength', 'media', 'method', 'multiple', 'name', 'nohref',
+    'object', 'onblur', 'onchange', 'onclick', 'ondblclick', 'onfocus',
+    'onkeydown', 'onkeypress', 'onkeyup', 'onload', 'onload', 'onmousedown',
+    'onmousemove', 'onmouseout', 'onmouseover', 'onmouseup', 'onreset',
+    'onselect', 'onsubmit', 'onunload', 'onunload', 'profile', 'prompt',
+    'readonly', 'rel', 'rev', 'rowspan', 'scheme', 'scope', 'selected',
+    'shape', 'span', 'src', 'standby', 'start', 'style', 'summary', 'title',
+    'type', 'usemap', 'value', 'valuetype', 'version']
+
+
 class StyleDict(object):
     """A mapping (dict-like) that allows attribute access to values.
 
@@ -199,6 +217,36 @@ def find_style_attributes(element_tree):
         style_attribute = element.get('style')
         if style_attribute:
             declarations, errors = parser.parse_style_attr(style_attribute)
+            for error in errors:
+                LOGGER.warn(error)
+            yield element, declarations, element_base_url(element)
+
+
+def find_presentational_attributes(element_tree):
+    """
+    Yield ``element, declaration, base_url`` for elements with
+    a presentational attribute.
+    """
+    parser = PARSER
+    for element in element_tree.iter():
+        attributes = {}
+        for key, value in element.attrib.items():
+            if key not in NON_PRESENTATIONAL_ATTRIBUTES:
+                attributes[key.lower()] = value.lower()
+        if attributes:
+            attribute_string = ''
+            for key, value in attributes.items():
+                # TODO: handle other attributes
+                if key == 'align':
+                    key = 'text-align'
+                elif key == 'cellspacing':
+                    key = 'border-spacing'
+                attribute_string += '%s:%s' % (key, value)
+                if key in ('height', 'width', 'border-spacing'):
+                    if not value.strip().endswith('%'):
+                        attribute_string += 'px'
+                attribute_string += ';'
+            declarations, errors = parser.parse_style_attr(attribute_string)
             for error in errors:
                 LOGGER.warn(error)
             yield element, declarations, element_base_url(element)
@@ -441,6 +489,16 @@ def get_all_computed_styles(html, user_stylesheets=None):
     #         weight: values with a greater weight take precedence, see
     #             http://www.w3.org/TR/CSS21/cascade.html#cascading-order
     cascaded_styles = {}
+
+    specificity = (0, 0, 0, 0)
+    for element, declarations, base_url in find_presentational_attributes(
+            element_tree):
+        for name, values, importance in preprocess_declarations(
+                base_url, declarations):
+            print(name, values, importance)
+            precedence = declaration_precedence('author', importance)
+            weight = (precedence, specificity)
+            add_declaration(cascaded_styles, name, values, weight, element)
 
     for sheets, origin in (
         # Order here is not important ('origin' is).
