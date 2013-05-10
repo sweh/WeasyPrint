@@ -38,9 +38,8 @@ vcs (git):
 code browser (github):
   project name: Kozea/WeasyPrint
 
-bug tracker (redmine):
-  base url: http://redmine.kozea.fr/
-  project name: weasyprint
+bug tracker (github):
+  project name: Kozea/WeasyPrint
 
 continuous integration (jenkins):
   base url: http://jenkins.kozea.org/
