@@ -14,6 +14,7 @@ from __future__ import division, unicode_literals
 
 from io import BytesIO
 import math
+from array import array
 
 import cairocffi
 cairocffi.install_as_pycairo()  # for CairoSVG
@@ -165,9 +166,25 @@ def get_image_from_uri(cache, url_fetcher, url, forced_mime_type=None):
                 if format_name == 'jpeg' and CAIRO_HAS_MIME_DATA:
                     surface.set_mime_data('image/jpeg', string)
                 image = RasterImage(surface)
-    except (URLFetchingError, ImageLoadingError) as exc:
-        LOGGER.warning('Failed to load image at %s : %s', url, exc)
+    except URLFetchingError as exc:
+        LOGGER.warning('Failed to fetch image at %s : %s', url, exc)
         image = None
+    except ImageLoadingError as exc:
+        with fetch(url_fetcher, url) as result:
+            string = (result['string'] if 'string' in result
+                      else result['file_obj'].read())
+        try:
+            # Use PIL when mimetype doesn't fit with given file, in order
+            # to try an other time to load the file
+            from PIL import Image
+            image = Image.open(BytesIO(string)).convert('RGBA')
+            data = array(str('B'), image.tobytes('raw', 'BGRA'))
+            surface = cairocffi.ImageSurface.create_for_data(
+                data, cairocffi.FORMAT_ARGB32, *image.size)
+            image = RasterImage(surface)
+        except Exception as exc:
+            LOGGER.warning('Failed to load image at %s : %s', url, exc)
+            image = None
     cache[url] = image
     return image
 
