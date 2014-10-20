@@ -37,10 +37,6 @@ sphinx (git):
   url: git://github.com/Kozea/WeasyPrint.git
   path: weasyprint
 
-vcs (git):
-  url: git://github.com/Kozea/WeasyPrint.git
-  path: /var/db/git/weasyprint.git
-
 code browser (github):
   project name: Kozea/WeasyPrint
   ribbon: Fork me on GitHub
