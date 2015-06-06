@@ -534,3 +534,59 @@ xmp { display: block; font-family: monospace; margin-bottom: 1em; margin-top: 1e
     @bottom-right        { text-align: right;  vertical-align:  middle }
     @bottom-right-corner { text-align: left;   vertical-align:  middle }
 }
+
+
+/*
+
+Presentational styles
+
+http://www.w3.org/TR/html5/rendering.html#the-css-user-agent-style-sheet-and-presentational-hints
+
+*/
+
+body {
+  margin-top: -weasy-pixel(attr(marginheight), attr(topmargin), 8px);
+  margin-right: -weasy-pixel(attr(marginwidth), attr(rightmargin), 8px);
+  margin-bottom: -weasy-pixel(attr(marginheight), attr(bottommargin), 8px);
+  margin-left: -weasy-pixel(attr(marginwidth), attr(leftmargin), 8px);
+}
+
+table {
+  border-spacing: -weasy-pixel(attr(cellspacing), 2px);
+  margin-top: -weasy-dimension(attr(vspace));
+  margin-right: -weasy-dimension(attr(hspace));
+  margin-bottom: -weasy-dimension(attr(vspace));
+  margin-left: -weasy-dimension(attr(hspace));
+  border-top: -weasy-dimension(attr(border), 1px);
+  border-right: -weasy-dimension(attr(border), 1px);
+  border-bottom: -weasy-dimension(attr(border), 1px);
+  border-left: -weasy-dimension(attr(border), 1px);
+  height: -weasy-dimension(attr(height));
+  width: -weasy-dimension(attr(width));
+}
+
+col {
+  width: -weasy-dimension(attr(width));
+}
+
+tr {
+  height: -weasy-dimension(attr(height));
+}
+
+td, th {
+  height: -weasy-dimension(attr(height));
+  width: -weasy-dimension(attr(width));
+}
+
+hr {
+  width: -weasy-dimension(attr(width));
+}
+
+applet, embed, iframe, img, object, input[type=image] {
+  margin-top: -weasy-dimension(attr(vspace));
+  margin-right: -weasy-dimension(attr(hspace));
+  margin-bottom: -weasy-dimension(attr(vspace));
+  margin-left: -weasy-dimension(attr(hspace));
+  height: -weasy-dimension(attr(height));
+  width: -weasy-dimension(attr(width));
+}

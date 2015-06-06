@@ -13,7 +13,10 @@
 
 from __future__ import division, unicode_literals
 
-from .properties import INITIAL_VALUES, Dimension
+from tinycss.tokenizer import tokenize_flat
+
+from .properties import (
+    INITIAL_VALUES, Dimension, DimensionProperty, PixelLengthProperty)
 from ..urls import get_link_attribute
 from .. import text
 
@@ -267,6 +270,27 @@ def length_tuple(computer, name, values):
 @register_computer('hyphenate-limit-zone')
 def length(computer, name, value, font_size=None, pixels_only=False):
     """Compute a length ``value``."""
+    if isinstance(value, (PixelLengthProperty, DimensionProperty)):
+        for token in value.values:
+            if isinstance(token, Dimension):
+                return length(computer, name, token, font_size, pixels_only)
+            else:
+                token_name, attribute = token
+                assert token_name == 'attr'
+                tokens = tokenize_flat(computer.element.get(attribute, ''))
+                if len(tokens) == 1:
+                    token, = tokens
+                    if token.type == 'INTEGER':
+                        return length(
+                            computer, name, Dimension(token.value, 'px'),
+                            font_size, pixels_only)
+                    elif token.type == 'PERCENTAGE' and isinstance(
+                            value, DimensionProperty):
+                        return length(
+                            computer, name, Dimension(token.value, '%'),
+                            font_size, pixels_only)
+        return INITIAL_VALUES[name]
+
     if value == 'auto':
         return value
     if value.value == 0:

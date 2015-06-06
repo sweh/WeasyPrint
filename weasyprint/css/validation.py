@@ -25,7 +25,7 @@ from ..compat import urljoin, unquote
 from ..urls import url_is_absolute, iri_to_uri
 from ..images import LinearGradient, RadialGradient
 from .properties import (INITIAL_VALUES, KNOWN_PROPERTIES, NOT_PRINT_MEDIA,
-                         Dimension)
+                         Dimension, DimensionProperty, PixelLengthProperty)
 from . import computed_values
 
 # TODO: unit-test these validators
@@ -178,7 +178,32 @@ def comma_separated_list(function):
 
 
 def get_length(token, negative=True, percentage=False):
-    if (token.unit in LENGTH_UNITS or
+    if token.type == 'FUNCTION':
+        function = parse_function(token)
+        if function:
+            name, properties = function
+            if name in ('-weasy-pixel', '-weasy-dimension'):
+                length_properties = []
+                for token in properties:
+                    if token.type == 'FUNCTION':
+                        function = parse_function(token)
+                        if function:
+                            name, properties = function
+                            if name == 'attr' and len(properties) == 1:
+                                prop, = properties
+                                if prop.type == 'IDENT':
+                                    length_properties.append(
+                                        ('attr', prop.value))
+                    else:
+                        negative = percentage = name == '-weasy-dimension'
+                        length = get_length(token, negative, percentage)
+                        if length:
+                            length_properties.append(length)
+                if name == '-weasy-pixel':
+                    return PixelLengthProperty(length_properties)
+                else:
+                    return DimensionProperty(length_properties)
+    elif (token.unit in LENGTH_UNITS or
             (percentage and token.unit == '%') or
             (token.type in ('INTEGER', 'NUMBER') and token.value == 0)):
         if negative or token.value >= 0:

@@ -19,6 +19,11 @@ from tinycss.color3 import COLOR_KEYWORDS
 Dimension = collections.namedtuple('Dimension', ['value', 'unit'])
 
 
+# See 10.2 in http://www.w3.org/TR/html5/rendering.html
+DimensionProperty = collections.namedtuple('DimensionProperty', ['values'])
+PixelLengthProperty = collections.namedtuple('PixelLengthProperty', ['values'])
+
+
 # See http://www.w3.org/TR/CSS21/propidx.html
 INITIAL_VALUES = {
     'background_attachment': ['scroll'],
