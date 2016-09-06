@@ -217,7 +217,7 @@ Bug fixes:
   Fix some ``dlopen()`` library loading issues on OS X.
 * `#183 <https://github.com/Kozea/WeasyPrint/issues/183>`_:
   Break to the next page before a float that would overflow the page.
-  (It might still overflow if it’s bigger than the page.)
+0.32r (2016-09-06)
 * `#188 <https://github.com/Kozea/WeasyPrint/issues/188>`_:
   Require a recent enough version of Pyphen
 
