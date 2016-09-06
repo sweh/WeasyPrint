@@ -16,10 +16,10 @@
 from __future__ import division, unicode_literals
 
 import contextlib  # noqa
-import html5lib  # noqa
+import lxml.etree
 
 
-VERSION = '0.31'
+VERSION = '0.32r'
 __version__ = VERSION
 
 # Used for 'User-Agent' in HTTP and 'Creator' in PDF
@@ -83,16 +83,16 @@ class HTML(object):
             if source_type == 'tree':
                 result = source
             else:
-                if isinstance(source, unicode):
-                    result = html5lib.parse(
-                        source, treebuilder='lxml',
-                        namespaceHTMLElements=False)
+                if source_type == 'string':
+                    parse = lxml.etree.fromstring
                 else:
-                    result = html5lib.parse(
-                        source, treebuilder='lxml', override_encoding=encoding,
-                        transport_encoding=protocol_encoding,
-                        namespaceHTMLElements=False)
-                assert result
+                    parse = lxml.etree.parse
+                if not encoding:
+                    encoding = protocol_encoding
+                parser = lxml.etree.HTMLParser(encoding=encoding)
+                result = parse(source, parser=parser)
+                if result is None:
+                    raise ValueError('Error while parsing HTML')
         base_url = find_base_url(result, base_url)
         if hasattr(result, 'getroot'):
             result.docinfo.URL = base_url

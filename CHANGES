@@ -2,6 +2,11 @@ WeasyPrint changelog
 ====================
 
 
+Version 0.32r
+-------------
+
+* Remove dependency to html5lib as its unnecessary.
+
 Version 0.31
 ------------
 
