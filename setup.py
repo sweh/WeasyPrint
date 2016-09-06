@@ -42,7 +42,7 @@ else:
 
 setup(
     name='WeasyPrint',
-    version='0.32r',
+    version='0.33r.dev0',
     url='http://weasyprint.org/',
     license='BSD',
     description='WeasyPrint converts web documents to PDF.',
